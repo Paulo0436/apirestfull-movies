@@ -10,7 +10,7 @@ const documentacaoSwaggerRouter = require('./routes/documentacaoSwaggerRouter');
 
 // Rotas do domínio MOVIES (filmes)
 const categoriaFilmeRouter = require('./routes/categoriaFilmeRouter');
-const duracaoFilmeRouter = require('./routes/duracaoFilmeRouter');
+const duracaoFilmeRouter = require('./routes/formatoFilmeRouter');
 const estoqueFilmeRouter = require('./routes/estoqueFilmeRouter');
 const diretorFilmeRouter = require('./routes/diretorFilmeRouter');
 const filmeRouter = require('./routes/filmeRouter');
