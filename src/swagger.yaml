@@ -1,54 +1,57 @@
 openapi: 3.0.0
 info:
-  title: API REST - Filmes
+  title: API de Filmes
   version: 1.0.0
-  description: API para gerenciar filmes, usuários e estoque de filmes.
 
 servers:
-  - url: http://localhost:3000
-    description: Servidor local
+  - url: http://localhost:3000/api/v1
+
+tags:
+  - name: Usuários
+  - name: Categorias
+  - name: Formatos
+  - name: Diretores
+  - name: Estoque
+  - name: Filmes
 
 paths:
 
-  /filmes:
+  /usuario:
     get:
-      summary: Lista todos os filmes
-      tags: [Filmes]
+      tags: [Usuários]
+      summary: Listar todos os usuários
+      security:
+        - bearerAuth: []
       responses:
-        "200":
-          description: Lista de filmes retornada com sucesso
-    post:
-      summary: Cadastra um novo filme
-      tags: [Filmes]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Filme"
-      responses:
-        "201":
-          description: Filme criado com sucesso
+        200:
+          description: Lista de usuários
 
-  /filmes/{id}:
+  /usuario/{id}:
     get:
-      summary: Busca um filme pelo ID
-      tags: [Filmes]
+      tags: [Usuários]
+      summary: Buscar usuário por ID
+      security:
+        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: string
       responses:
-        "200":
-          description: Filme encontrado
+        200:
+          description: Usuário encontrado
+        404:
+          description: Usuário não encontrado
+
     put:
-      summary: Atualiza um filme pelo ID
-      tags: [Filmes]
+      tags: [Usuários]
+      summary: Atualizar usuário por ID
+      security:
+        - bearerAuth: []
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: string
@@ -57,89 +60,318 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Filme"
+              $ref: "#/components/schemas/UsuarioUpdate"
       responses:
-        "200":
-          description: Filme atualizado
-    delete:
-      summary: Deleta um filme pelo ID
-      tags: [Filmes]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        "204":
-          description: Filme removido
+        200:
+          description: Usuário atualizado
+        404:
+          description: Usuário não encontrado
 
-  /usuarios:
-    get:
-      summary: Lista todos os usuários
-      tags: [Usuarios]
+    delete:
+      tags: [Usuários]
+      summary: Excluir usuário por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
-        "200":
-          description: Lista retornada
+        200:
+          description: Usuário removido
+        404:
+          description: Usuário não encontrado
+
+  /usuario/register:
     post:
-      summary: Cria um novo usuário
-      tags: [Usuarios]
+      tags: [Usuários]
+      summary: Registrar novo usuário
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Usuario"
+              $ref: "#/components/schemas/UsuarioRegister"
       responses:
-        "201":
+        201:
           description: Usuário criado
 
-  /usuarios/login:
+  /usuario/login:
     post:
+      tags: [Usuários]
       summary: Login de usuário
-      tags: [Usuarios]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                senha:
-                  type: string
+              $ref: "#/components/schemas/UsuarioLogin"
       responses:
-        "200":
-          description: Login realizado
+        200:
+          description: Login realizado com sucesso
+        401:
+          description: Credenciais inválidas
 
-  /estoque:
+
+  # CATEGORIA
+  /movie/categoria:
     get:
-      summary: Lista o estoque
-      tags: [Estoque]
+      tags: [Categorias]
+      summary: Listar categorias
       responses:
-        "200":
-          description: Estoque retornado
-    post:
-      summary: Adiciona um filme ao estoque
-      tags: [Estoque]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Estoque"
-      responses:
-        "201":
-          description: Item adicionado
+        200:
+          description: Categorias listadas
 
-  /estoque/{id}:
-    put:
-      summary: Atualiza um item do estoque
-      tags: [Estoque]
+    post:
+      tags: [Categorias]
+      summary: Criar categoria
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Categoria"
+      responses:
+        201:
+          description: Categoria criada
+
+  /movie/categoria/{id}:
+    get:
+      tags: [Categorias]
+      summary: Buscar categoria por ID
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Categoria encontrada
+        404:
+          description: Não encontrada
+
+    put:
+      tags: [Categorias]
+      summary: Atualizar categoria
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Categoria"
+      responses:
+        200:
+          description: Categoria atualizada
+
+    delete:
+      tags: [Categorias]
+      summary: Excluir categoria
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Categoria removida
+
+
+  # FORMATO
+  /movie/formato:
+    get:
+      tags: [Formatos]
+      summary: Listar formatos
+      responses:
+        200:
+          description: Lista de formatos
+
+    post:
+      tags: [Formatos]
+      summary: Criar formato
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Formato"
+      responses:
+        201:
+          description: Formato criado
+
+  /movie/formato/{id}:
+    get:
+      tags: [Formatos]
+      summary: Buscar formato por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Formato encontrado
+        404:
+          description: Não encontrado
+
+    put:
+      tags: [Formatos]
+      summary: Atualizar formato
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Formato"
+      responses:
+        200:
+          description: Atualizado
+
+    delete:
+      tags: [Formatos]
+      summary: Excluir formato
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Removido
+
+
+  # DIRETOR
+  /movie/diretor:
+    get:
+      tags: [Diretores]
+      summary: Listar diretores
+      responses:
+        200:
+          description: Lista retornada
+
+    post:
+      tags: [Diretores]
+      summary: Criar diretor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Diretor"
+      responses:
+        201:
+          description: Diretor criado
+
+  /movie/diretor/{id}:
+    get:
+      tags: [Diretores]
+      summary: Buscar diretor por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Encontrado
+        404:
+          description: Não encontrado
+
+    put:
+      tags: [Diretores]
+      summary: Atualizar diretor
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Diretor"
+      responses:
+        200:
+          description: Atualizado
+
+    delete:
+      tags: [Diretores]
+      summary: Excluir diretor
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Removido
+
+
+  # ESTOQUE
+  /movie/estoque:
+    get:
+      tags: [Estoque]
+      summary: Listar estoque de filmes
+      responses:
+        200:
+          description: Lista de estoque
+
+    post:
+      tags: [Estoque]
+      summary: Criar registro de estoque
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Estoque"
+      responses:
+        201:
+          description: Criado
+
+  /movie/estoque/{id}:
+    get:
+      tags: [Estoque]
+      summary: Buscar item de estoque por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Encontrado
+        404:
+          description: Não encontrado
+
+    put:
+      tags: [Estoque]
+      summary: Atualizar item de estoque
+      parameters:
+        - in: path
+          name: id
           required: true
           schema:
             type: string
@@ -150,59 +382,169 @@ paths:
             schema:
               $ref: "#/components/schemas/Estoque"
       responses:
-        "200":
-          description: Estoque atualizado
+        200:
+          description: Atualizado
+
     delete:
-      summary: Remove um item do estoque
       tags: [Estoque]
+      summary: Excluir item de estoque
       parameters:
-        - name: id
-          in: path
+        - in: path
+          name: id
           required: true
           schema:
             type: string
       responses:
-        "204":
-          description: Removido do estoque
+        200:
+          description: Removido
+
+
+  # FILMES
+  /movie/filme:
+    get:
+      tags: [Filmes]
+      summary: Listar filmes
+      responses:
+        200:
+          description: Lista de filmes
+
+    post:
+      tags: [Filmes]
+      summary: Criar filme
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Filme"
+      responses:
+        201:
+          description: Criado
+
+  /movie/filme/{id}:
+    get:
+      tags: [Filmes]
+      summary: Buscar filme por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Filme encontrado
+        404:
+          description: Não encontrado
+
+    put:
+      tags: [Filmes]
+      summary: Atualizar filme
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Filme"
+      responses:
+        200:
+          description: Atualizado
+
+    delete:
+      tags: [Filmes]
+      summary: Excluir filme
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Removido
+
 
 components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
   schemas:
 
-    Filme:
+    UsuarioRegister:
       type: object
-      required: ["nome", "genero", "ano"]
       properties:
         nome:
           type: string
-          example: Vingadores
-        genero:
-          type: string
-          example: Ação
-        ano:
-          type: integer
-          example: 2012
-
-    Usuario:
-      type: object
-      required: ["nome", "email", "senha"]
-      properties:
-        nome:
-          type: string
-          example: João Silva
         email:
           type: string
-          example: joao@email.com
         senha:
           type: string
-          example: 123456
+
+    UsuarioLogin:
+      type: object
+      properties:
+        email:
+          type: string
+        senha:
+          type: string
+
+    UsuarioUpdate:
+      type: object
+      properties:
+        nome:
+          type: string
+        email:
+          type: string
+
+    Categoria:
+      type: object
+      properties:
+        nome:
+          type: string
+
+    Formato:
+      type: object
+      properties:
+        nome:
+          type: string
+
+    Diretor:
+      type: object
+      properties:
+        nome:
+          type: string
+        nacionalidade:
+          type: string
 
     Estoque:
       type: object
-      required: ["filmeId", "quantidade"]
       properties:
-        filmeId:
-          type: string
-          example: 60af884afcc3b3428ca12345
         quantidade:
           type: integer
-          example: 10
+        filmeId:
+          type: string
+
+    Filme:
+      type: object
+      properties:
+        titulo:
+          type: string
+        ano:
+          type: integer
+        genero:
+          type: string
+        diretorId:
+          type: string
+        categoriaId:
+          type: string
+        formatoId:
+          type: string
