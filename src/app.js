@@ -10,7 +10,7 @@ const documentacaoSwaggerRouter = require('./routes/documentacaoSwaggerRouter');
 
 // Rotas do domínio MOVIES (filmes)
 const categoriaFilmeRouter = require('./routes/categoriaFilmeRouter');
-const duracaoFilmeRouter = require('./routes/formatoFilmeRouter');
+const formatoFilmeRouter = require('./routes/formatoFilmeRouter');
 const estoqueFilmeRouter = require('./routes/estoqueFilmeRouter');
 const diretorFilmeRouter = require('./routes/diretorFilmeRouter');
 const filmeRouter = require('./routes/filmeRouter');
@@ -34,7 +34,7 @@ app.use('/api/v1/api-documentation', documentacaoSwaggerRouter);
 
 // Rotas relacionadas a FILMES
 app.use('/api/v1/movie/categoria', categoriaFilmeRouter);
-app.use('/api/v1/movie/duracao', duracaoFilmeRouter);
+app.use('/api/v1/movie/formato', formatoFilmeRouter);
 app.use('/api/v1/movie/estoque', estoqueFilmeRouter);
 app.use('/api/v1/movie/diretor', diretorFilmeRouter);
 
