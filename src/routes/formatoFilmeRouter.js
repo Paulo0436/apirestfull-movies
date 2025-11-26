@@ -1,42 +1,35 @@
 const express = require('express');
-const duracaoFilmeController = require('../controller/duracaoFilmeController');
+const formatoFilmeController = require('../controller/formatoFilmeController');
 const router = express.Router();
 const autentificacao = require('../middleware/autentificacaoMiddleware');
 
-// Criar duração de filme
-router.post(
-    '/',
-    autentificacao.verificarTokenDeAutentificacao,
-    duracaoFilmeController.adicionarDuracao
+// Criar novo formato (DVD, Blu-ray, Digital, 4K…)
+router.post('/', 
+  autentificacao.verificarTokenDeAutentificacao, 
+  formatoFilmeController.adicionarFormato
 );
 
-// Editar duração de filme
-router.put(
-    '/:id',
-    autentificacao.verificarTokenDeAutentificacao,
-    duracaoFilmeController.buscarDuracao,
-    duracaoFilmeController.editarDuracao
+// Editar formato existente
+router.put('/:id', 
+  autentificacao.verificarTokenDeAutentificacao, 
+  formatoFilmeController.buscarFormato,
+  formatoFilmeController.editarFormato
 );
 
-// Listar todas as durações de filmes
-router.get(
-    '/',
-    duracaoFilmeController.listarDuracoes
+// Listar todos os formatos
+router.get('/', formatoFilmeController.listarFormatos);
+
+// Buscar formato específico
+router.get('/:id',
+  formatoFilmeController.buscarFormato,
+  formatoFilmeController.exibirFormato
 );
 
-// Exibir uma duração específica
-router.get(
-    '/:id',
-    duracaoFilmeController.buscarDuracao,
-    duracaoFilmeController.exibirDuracao
-);
-
-// Deletar duração de filme
-router.delete(
-    '/:id',
-    autentificacao.verificarTokenDeAutentificacao,
-    duracaoFilmeController.buscarDuracao,
-    duracaoFilmeController.deletarDuracao
+// Deletar formato
+router.delete('/:id',
+  autentificacao.verificarTokenDeAutentificacao,
+  formatoFilmeController.buscarFormato,
+  formatoFilmeController.deletarFormato
 );
 
 module.exports = router;
