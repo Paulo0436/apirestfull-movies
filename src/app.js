@@ -30,7 +30,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // Swagger
-app.use('/api/v1/api-documentation', documentacaoSwaggerRouter);
+app.use('/api-docs', documentacaoSwaggerRouter);
+
 
 // Rotas relacionadas a FILMES
 app.use('/api/v1/movie/categoria', categoriaFilmeRouter);

@@ -1,0 +1,208 @@
+openapi: 3.0.0
+info:
+  title: API REST - Filmes
+  version: 1.0.0
+  description: API para gerenciar filmes, usuários e estoque de filmes.
+
+servers:
+  - url: http://localhost:3000
+    description: Servidor local
+
+paths:
+
+  /filmes:
+    get:
+      summary: Lista todos os filmes
+      tags: [Filmes]
+      responses:
+        "200":
+          description: Lista de filmes retornada com sucesso
+    post:
+      summary: Cadastra um novo filme
+      tags: [Filmes]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Filme"
+      responses:
+        "201":
+          description: Filme criado com sucesso
+
+  /filmes/{id}:
+    get:
+      summary: Busca um filme pelo ID
+      tags: [Filmes]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Filme encontrado
+    put:
+      summary: Atualiza um filme pelo ID
+      tags: [Filmes]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Filme"
+      responses:
+        "200":
+          description: Filme atualizado
+    delete:
+      summary: Deleta um filme pelo ID
+      tags: [Filmes]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Filme removido
+
+  /usuarios:
+    get:
+      summary: Lista todos os usuários
+      tags: [Usuarios]
+      responses:
+        "200":
+          description: Lista retornada
+    post:
+      summary: Cria um novo usuário
+      tags: [Usuarios]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Usuario"
+      responses:
+        "201":
+          description: Usuário criado
+
+  /usuarios/login:
+    post:
+      summary: Login de usuário
+      tags: [Usuarios]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                senha:
+                  type: string
+      responses:
+        "200":
+          description: Login realizado
+
+  /estoque:
+    get:
+      summary: Lista o estoque
+      tags: [Estoque]
+      responses:
+        "200":
+          description: Estoque retornado
+    post:
+      summary: Adiciona um filme ao estoque
+      tags: [Estoque]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Estoque"
+      responses:
+        "201":
+          description: Item adicionado
+
+  /estoque/{id}:
+    put:
+      summary: Atualiza um item do estoque
+      tags: [Estoque]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Estoque"
+      responses:
+        "200":
+          description: Estoque atualizado
+    delete:
+      summary: Remove um item do estoque
+      tags: [Estoque]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Removido do estoque
+
+components:
+  schemas:
+
+    Filme:
+      type: object
+      required: ["nome", "genero", "ano"]
+      properties:
+        nome:
+          type: string
+          example: Vingadores
+        genero:
+          type: string
+          example: Ação
+        ano:
+          type: integer
+          example: 2012
+
+    Usuario:
+      type: object
+      required: ["nome", "email", "senha"]
+      properties:
+        nome:
+          type: string
+          example: João Silva
+        email:
+          type: string
+          example: joao@email.com
+        senha:
+          type: string
+          example: 123456
+
+    Estoque:
+      type: object
+      required: ["filmeId", "quantidade"]
+      properties:
+        filmeId:
+          type: string
+          example: 60af884afcc3b3428ca12345
+        quantidade:
+          type: integer
+          example: 10
