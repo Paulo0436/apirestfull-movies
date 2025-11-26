@@ -6,7 +6,7 @@ async function conectarAoBancoDeDados() {
   const host = process.env.MONGODB_HOST;
   const dbname = process.env.MONGODB_DBNAME;
 
-  // A senha pode precisar de encodeURIComponent caso tenha caracteres especiais
+  
   const URL = `mongodb+srv://${user}:${encodeURIComponent(passwd)}@${host}/${dbname}?retryWrites=true&w=majority`;
 
   try {
