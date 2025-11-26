@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Filme = require('../models/filmeModel');
-const Estoque = require('../models/estoqueModel');
+const Estoque = require('../models/estoqueFilmeModel');
 const Formato = require('../models/formatoFilmeModel');
 
 async function adicionarEstoque(req, res) {

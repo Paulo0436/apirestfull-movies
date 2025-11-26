@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Categoria = require('../models/categoriaModel');
+const Categoria = require('../models/categoriaFilmeModel');
 const Filme = require('../models/filmeModel');
 
 async function adicionarCategoria(req, res) {
