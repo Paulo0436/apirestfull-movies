@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const Usuario = require('../models/usuarioFilmeModel'); // ajuste o nome conforme seu model
+const Usuario = require('../models/usuarioModel'); 
 
 async function adicionarUsuario(req, res) {
     try {

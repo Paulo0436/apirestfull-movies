@@ -1,18 +1,19 @@
-const mongoose = require('mongoose');
-
-const url = `mongodb+srv://${process.env.MONGODB_USER}:${process.env.MONGODB_PASSWD}@${process.env.MONGODB_HOST}/${process.env.MONGODB_DBNAM}?retryWrites=true&w=majority`;
-
+const mongoose = require("mongoose");
 
 async function conectarAoBancoDeDados() {
-  try {
-    await mongoose.connect(url, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+  const user = process.env.MONGODB_USER;
+  const passwd = process.env.MONGODB_PASSWD;
+  const host = process.env.MONGODB_HOST;
+  const dbname = process.env.MONGODB_DBNAME;
 
-    console.log("Conectado ao MongoDB com sucesso!");
+  // A senha pode precisar de encodeURIComponent caso tenha caracteres especiais
+  const URL = `mongodb+srv://${user}:${encodeURIComponent(passwd)}@${host}/${dbname}?retryWrites=true&w=majority`;
+
+  try {
+    await mongoose.connect(URL);
+    console.log(" MongoDB conectado com sucesso!");
   } catch (error) {
-    console.error("Erro ao conectar ao MongoDB:", error.message);
+    console.error(" Erro ao conectar ao MongoDB:", error.message);
     process.exit(1);
   }
 }

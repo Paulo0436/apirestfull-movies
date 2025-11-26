@@ -1,5 +1,5 @@
 const express = require('express');
-const estoqueFilmeController = require('../controller/estoqueFilmeController');
+const estoqueFilmeController = require('../controller/estoqueController');
 const router = express.Router();
 const autentificacao = require('../middleware/autentificacaoMiddleware');
 
