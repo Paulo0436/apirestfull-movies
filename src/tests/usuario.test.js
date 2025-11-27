@@ -2,300 +2,279 @@ const supertest = require('supertest');
 const app = require('../app');
 const request = supertest(app);
 
-const base = "/api/v1/usuario";
-const rotaLogin = "/api/v1/usuario/login";
-const rotaRenovar = "/api/v1/usuario/renova";
+const url = '/api/v1/usuario';
+const urlLogin = '/api/v1/usuario/login';
+const urlRenovar = '/api/v1/usuario/renova';
 
-let usuarioId = null;
-let authToken = null;
+let id = null;
+let token = null;
 
-const t = Date.now();
-const usuarioInicial = {
-    nome: `userInit${t}`,
-    email: `userInit${t}@gmail.com`,
-    senha: `senhaInit${t}`
-};
+const tempo = Date.now();
+let nomeUser = `nomeUserTest${tempo}`;
+let emailUser = `emailUserTest${tempo}@gmail.com`;
+let senhaUser = `senhaUserTest${tempo}`;
 
-const novoUsuario = {
-    nome: `novoUser${t}`,
-    email: `novoUser${t}@gmail.com`,
-    senha: `senhaUser${t}`
-};
+let nome = `nomeTest${tempo}`;
+let email = `emailTest${tempo}@gmail.com`;
+let senha = `senhaTest${tempo}`;
 
-describe("TESTES DAS ROTAS DE USUÁRIO (API FILMES)", () => {
+describe('Testes das rotas de USUARIO', () => {
 
-    // Login inicial para gerar token
     beforeAll(async () => {
-        await request.post(base).send(usuarioInicial);
-
-        const login = await request.post(rotaLogin).send({
-            email: usuarioInicial.email,
-            senha: usuarioInicial.senha
+        await request.post(url).send({
+            nome: nomeUser,
+            email: emailUser,
+            senha: senhaUser
         });
 
-        expect(login.status).toBe(200);
-        authToken = login.body.token;
+        const resposta = await request.post(urlLogin).send({
+            email: emailUser,
+            senha: senhaUser
+        });
+        
+        expect(resposta.status).toBe(200);
+        expect(resposta.body.token).toBeDefined();
+        token = resposta.body.token;
     });
 
-    
-   
-    
-
-    test("POST → nome faltando deve retornar 422", async () => {
-        const resp = await request.post(base).send({
-            nome: undefined,
-            email: novoUsuario.email,
-            senha: novoUsuario.senha
+    test('POST:422 nome inexistente', async () => {
+        const resposta = await request.post(url).send({
+            nome: null,
+            email: email,
+            senha: senha
         });
 
-        expect(resp.status).toBe(422);
-        expect(resp.body.msg).toMatch("O campo nome precisa ser informado");
+        expect(resposta.status).toBe(422);
+        expect(resposta.body.msg).toContain('Nome do usuário é obrigatório');
     });
 
-    test("POST → email ausente deve retornar 422", async () => {
-        const resp = await request.post(base).send({
-            nome: novoUsuario.nome,
-            email: "",
-            senha: novoUsuario.senha
+    test('POST:422 email inexistente', async () => {
+        const resposta = await request.post(url).send({
+            nome: nome,
+            email: null,
+            senha: senha
         });
 
-        expect(resp.status).toBe(422);
-        expect(resp.body.msg).toMatch("Informe um email válido");
+        expect(resposta.status).toBe(422);
+        expect(resposta.body.msg).toContain('Email do usuário é obrigatório');
     });
 
-    test("POST → senha não enviada deve retornar 422", async () => {
-        const resp = await request.post(base).send({
-            nome: novoUsuario.nome,
-            email: novoUsuario.email,
+    test('POST:422 senha inexistente', async () => {
+        const resposta = await request.post(url).send({
+            nome: nome,
+            email: email,
             senha: null
         });
 
-        expect(resp.status).toBe(422);
-        expect(resp.body.msg).toMatch("Senha é obrigatória");
+        expect(resposta.status).toBe(422);
+        expect(resposta.body.msg).toContain('Senha do usuário é obrigatória');
     });
 
-    test("POST → cadastro bem-sucedido (201)", async () => {
-        const resp = await request.post(base).send(novoUsuario);
-
-        expect(resp.status).toBe(201);
-        expect(resp.body.nome).toBe(novoUsuario.nome);
-        expect(resp.body.email).toBe(novoUsuario.email.toLowerCase());
-
-        usuarioId = resp.body._id;
-    });
-
-    
-    
-    
-
-    test("GET → deve listar usuários (200)", async () => {
-        const resp = await request
-            .get(base)
-            .set("authorization", `Bearer ${authToken}`);
-
-        expect(resp.status).toBe(200);
-        expect(Array.isArray(resp.body)).toBe(true);
-    });
-
-    
-   
-    
-
-    test("GET:id → id mal-formado deve retornar 400", async () => {
-        const resp = await request
-            .get(`${base}/123`)
-            .set("authorization", `Bearer ${authToken}`);
-
-        expect(resp.status).toBe(400);
-        expect(resp.body.msg).toContain("ID informado não é válido");
-    });
-
-    test("GET:id → usuário inexistente (404)", async () => {
-        const resp = await request
-            .get(`${base}/000000000000000000000000`)
-            .set("authorization", `Bearer ${authToken}`);
-
-        expect(resp.status).toBe(404);
-        expect(resp.body.msg).toContain("Usuário não localizado");
-    });
-
-    test("GET:id → token não enviado (401)", async () => {
-        const resp = await request.get(`${base}/${usuarioId}`);
-
-        expect(resp.status).toBe(401);
-        expect(resp.body.msg).toContain("Token ausente");
-    });
-
-    test("GET:id → deve retornar o usuário correto (200)", async () => {
-        const resp = await request
-            .get(`${base}/${usuarioId}`)
-            .set("authorization", `Bearer ${authToken}`);
-
-        expect(resp.status).toBe(200);
-        expect(resp.body.email).toBe(novoUsuario.email.toLowerCase());
-    });
-
-    
-   
-    
-
-    test("PUT:id → id inválido retorna 400", async () => {
-        const resp = await request
-            .put(`${base}/abc`)
-            .set("authorization", `Bearer ${authToken}`)
-            .send({
-                nome: novoUsuario.nome + "_edit",
-                email: novoUsuario.email,
-                senha: novoUsuario.senha
-            });
-
-        expect(resp.status).toBe(400);
-        expect(resp.body.msg).toContain("ID informado não é válido");
-    });
-
-    test("PUT:id → usuário não encontrado retorna 404", async () => {
-        const resp = await request
-            .put(`${base}/000000000000000000000000`)
-            .set("authorization", `Bearer ${authToken}`)
-            .send({
-                nome: novoUsuario.nome + "_edit",
-                email: novoUsuario.email,
-                senha: novoUsuario.senha
-            });
-
-        expect(resp.status).toBe(404);
-        expect(resp.body.msg).toContain("Usuário não localizado");
-    });
-
-    test("PUT:id → token ausente retorna 401", async () => {
-        const resp = await request
-            .put(`${base}/${usuarioId}`)
-            .send({
-                nome: novoUsuario.nome + "_edit",
-                email: novoUsuario.email,
-                senha: novoUsuario.senha
-            });
-
-        expect(resp.status).toBe(401);
-        expect(resp.body.msg).toContain("Token ausente");
-    });
-
-    test("PUT:id → atualização concluída (200)", async () => {
-        const resp = await request
-            .put(`${base}/${usuarioId}`)
-            .set("authorization", `Bearer ${authToken}`)
-            .send({
-                nome: novoUsuario.nome + "_edit",
-                email: novoUsuario.email,
-                senha: novoUsuario.senha
-            });
-
-        expect(resp.status).toBe(200);
-        expect(resp.body.nome).toContain("_edit");
-    });
-
-    
-   
-    
-
-    test("LOGIN → email incorreto (401)", async () => {
-        const resp = await request.post(rotaLogin).send({
-            email: "naoexiste@gmail.com",
-            senha: novoUsuario.senha
+    test('POST:201', async () => {
+        const resposta = await request.post(url).send({
+            nome: nome,
+            email: email,
+            senha: senha
         });
 
-        expect(resp.status).toBe(401);
-        expect(resp.body.msg).toContain("Credenciais inválidas");
+        expect(resposta.status).toBe(201);
+        expect(resposta.body.nome).toBe(nome);
+        expect(resposta.body.email).toBe(email.toLowerCase());
+        id = resposta.body._id;
     });
 
-    test("LOGIN → senha incorreta (401)", async () => {
-        const resp = await request.post(rotaLogin).send({
-            email: novoUsuario.email,
-            senha: "errada"
-        });
-
-        expect(resp.status).toBe(401);
-        expect(resp.body.msg).toContain("Credenciais inválidas");
+    test('GET:200', async () => {
+        const resposta = await request
+            .get(url)
+            .set("authorization", `Bearer ${token}`);
+        
+        expect(resposta.status).toBe(200);
+        expect(Array.isArray(resposta.body)).toBe(true);
     });
 
-    test("LOGIN → login válido (200)", async () => {
-        const resp = await request.post(rotaLogin).send({
-            email: novoUsuario.email,
-            senha: novoUsuario.senha
-        });
+    test('GET:id:400 id inválido', async () => {
+        const resposta = await request
+            .get(`${url}/0`)
+            .set("authorization", `Bearer ${token}`);
 
-        expect(resp.status).toBe(200);
-        expect(resp.body.token).toBeDefined();
+        expect(resposta.status).toBe(400);
+        expect(resposta.body.msg).toContain("Parâmetro inválido");
     });
 
-    
-   
-    
+    test('GET:id:404 id não encontrado', async () => {
+        const resposta = await request
+            .get(`${url}/000000000000000000000000`)
+            .set("authorization", `Bearer ${token}`);
 
-    test("RENOVAR → token não enviado (401)", async () => {
-        const resp = await request.post(rotaRenovar).send({
-            email: novoUsuario.email
-        });
-
-        expect(resp.status).toBe(401);
-        expect(resp.body.msg).toContain("Token ausente");
+        expect(resposta.status).toBe(404);
+        expect(resposta.body.msg).toContain("Usuário não encontrado");
     });
 
-    test("RENOVAR → renovar token (200)", async () => {
-        const resp = await request
-            .post(rotaRenovar)
-            .set("authorization", `Bearer ${authToken}`)
+    test('GET:id:401 token ausente', async () => {
+        const resposta = await request.get(`${url}/${id}`);
+
+        expect(resposta.status).toBe(401);
+        expect(resposta.body.msg).toContain("Token ausente");
+    });
+
+    test('GET:id:200', async () => {
+        const resposta = await request
+            .get(`${url}/${id}`)
+            .set("authorization", `Bearer ${token}`);
+
+        expect(resposta.status).toBe(200);
+        expect(resposta.body.nome).toBe(nome);
+        expect(resposta.body.email).toBe(email.toLowerCase());
+    });
+
+    test('PUT:id:400 id inválido', async () => {
+        const resposta = await request
+            .put(`${url}/0`)
+            .set("authorization", `Bearer ${token}`)
             .send({
-                email: novoUsuario.email
+                nome: `${nome}2`,
+                email,
+                senha
             });
 
-        expect(resp.status).toBe(200);
-        expect(resp.body.token).toBeDefined();
+        expect(resposta.status).toBe(400);
+        expect(resposta.body.msg).toContain("Parâmetro inválido");
     });
 
-    
-    
-    
+    test('PUT:id:404 id não encontrado', async () => {
+        const resposta = await request
+            .put(`${url}/000000000000000000000000`)
+            .set("authorization", `Bearer ${token}`)
+            .send({
+                nome: `${nome}2`,
+                email,
+                senha
+            });
 
-    test("DELETE:id → id inválido retorna 400", async () => {
-        const resp = await request
-            .delete(`${base}/xxx`)
-            .set("authorization", `Bearer ${authToken}`);
-
-        expect(resp.status).toBe(400);
-        expect(resp.body.msg).toContain("ID informado não é válido");
+        expect(resposta.status).toBe(404);
+        expect(resposta.body.msg).toContain("Usuário não encontrado");
     });
 
-    test("DELETE:id → usuário inexistente retorna 404", async () => {
-        const resp = await request
-            .delete(`${base}/000000000000000000000000`)
-            .set("authorization", `Bearer ${authToken}`);
+    test('PUT:id:401 token ausente', async () => {
+        const resposta = await request
+            .put(`${url}/${id}`)
+            .send({
+                nome: `${nome}2`,
+                email,
+                senha
+            });
 
-        expect(resp.status).toBe(404);
-        expect(resp.body.msg).toContain("Usuário não localizado");
+        expect(resposta.status).toBe(401);
+        expect(resposta.body.msg).toContain("Token ausente");
     });
 
-    test("DELETE:id → sem token retorna 401", async () => {
-        const resp = await request.delete(`${base}/${usuarioId}`);
+    test('PUT:id:200', async () => {
+        const resposta = await request
+            .put(`${url}/${id}`)
+            .set("authorization", `Bearer ${token}`)
+            .send({
+                nome: `${nome}2`,
+                email,
+                senha
+            });
 
-        expect(resp.status).toBe(401);
-        expect(resp.body.msg).toContain("Token ausente");
+        expect(resposta.status).toBe(200);
+        expect(resposta.body.nome).toMatch(`${nome}2`);
+        id = resposta.body._id;
     });
 
-    test("DELETE:id → remoção com sucesso (204)", async () => {
-        const resp = await request
-            .delete(`${base}/${usuarioId}`)
-            .set("authorization", `Bearer ${authToken}`);
+    test('/login POST:401 email incorreto', async () => {
+        const resposta = await request.post(urlLogin).send({
+            email: "email@gmail.com",
+            senha
+        });
 
-        expect(resp.status).toBe(204);
+        expect(resposta.status).toBe(401);
+        expect(resposta.body.msg).toContain("Credenciais inválidas");
     });
 
-    test("GET:id após DELETE → deve retornar 404", async () => {
-        const resp = await request
-            .get(`${base}/${usuarioId}`)
-            .set("authorization", `Bearer ${authToken}`);
+    test('/login POST:401 senha incorreta', async () => {
+        const resposta = await request.post(urlLogin).send({
+            email,
+            senha: "senha"
+        });
 
-        expect(resp.status).toBe(404);
-        expect(resp.body.msg).toContain("Usuário não localizado");
+        expect(resposta.status).toBe(401);
+        expect(resposta.body.msg).toContain("Credenciais inválidas");
+    });
+
+    test('/login POST:200', async () => {
+        const resposta = await request.post(urlLogin).send({
+            email,
+            senha
+        });
+
+        expect(resposta.status).toBe(200);
+        expect(resposta.body.token).toBeDefined();
+    });
+
+    test('/renovar POST:401 token ausente', async () => {
+        const resposta = await request.post(urlRenovar).send({
+            email,
+            senha
+        });
+
+        expect(resposta.status).toBe(401);
+        expect(resposta.body.msg).toContain("Token ausente");
+    });
+
+    test('/renovar POST:200', async () => {
+        const resposta = await request
+            .post(urlRenovar)
+            .set("authorization", `Bearer ${token}`)
+            .send({
+                email,
+                senha
+            });
+
+        expect(resposta.status).toBe(200);
+        expect(resposta.body.token).toBeDefined();
+    });
+
+    test('DELETE:id:400 id inválido', async () => {
+        const resposta = await request
+            .delete(`${url}/0`)
+            .set("authorization", `Bearer ${token}`);
+
+        expect(resposta.status).toBe(400);
+        expect(resposta.body.msg).toContain("Parâmetro inválido");
+    });
+
+    test('DELETE:id:404 id não encontrado', async () => {
+        const resposta = await request
+            .delete(`${url}/000000000000000000000000`)
+            .set("authorization", `Bearer ${token}`);
+
+        expect(resposta.status).toBe(404);
+        expect(resposta.body.msg).toContain("Usuário não encontrado");
+    });
+
+    test('DELETE:id:401 token ausente', async () => {
+        const resposta = await request.delete(`${url}/${id}`);
+
+        expect(resposta.status).toBe(401);
+        expect(resposta.body.msg).toContain("Token ausente");
+    });
+
+    test('DELETE:id:204', async () => {
+        const resposta = await request
+            .delete(`${url}/${id}`)
+            .set("authorization", `Bearer ${token}`);
+
+        expect(resposta.status).toBe(204);
+    });
+
+    test('GET:id:404 após deletar', async () => {
+        const resposta = await request
+            .get(`${url}/${id}`)
+            .set("authorization", `Bearer ${token}`);
+
+        expect(resposta.status).toBe(404);
+        expect(resposta.body.msg).toContain("Usuário não encontrado");
     });
 });
