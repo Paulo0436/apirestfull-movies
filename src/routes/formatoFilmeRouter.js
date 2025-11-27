@@ -1,35 +1,33 @@
 const express = require('express');
-const formatoFilmeController = require('../controller/formatoFilmeController');
+const controller = require('../controller/formatoFilmeController');
+const autenticacao = require('../middleware/autentificacaoMiddleware');
 const router = express.Router();
-const autentificacao = require('../middleware/autentificacaoMiddleware');
 
-// Criar novo formato (DVD, Blu-ray, Digital, 4K…)
-router.post('/', 
-  autentificacao.verificarTokenDeAutentificacao, 
-  formatoFilmeController.adicionarFormato
+router.post(
+  '/',
+  autenticacao.verificarTokenDeAutentificacao,
+  controller.criar
 );
 
-// Editar formato existente
-router.put('/:id', 
-  autentificacao.verificarTokenDeAutentificacao, 
-  formatoFilmeController.buscarFormato,
-  formatoFilmeController.editarFormato
+router.put(
+  '/:id',
+  autenticacao.verificarTokenDeAutentificacao,
+  controller.localizar,
+  controller.atualizar
 );
 
-// Listar todos os formatos
-router.get('/', formatoFilmeController.listarFormatos);
+router.get('/', controller.listar);
 
-// Buscar formato específico
 router.get('/:id',
-  formatoFilmeController.buscarFormato,
-  formatoFilmeController.exibirFormato
+  controller.localizar,
+  controller.mostrar
 );
 
-// Deletar formato
-router.delete('/:id',
-  autentificacao.verificarTokenDeAutentificacao,
-  formatoFilmeController.buscarFormato,
-  formatoFilmeController.deletarFormato
+router.delete(
+  '/:id',
+  autenticacao.verificarTokenDeAutentificacao,
+  controller.localizar,
+  controller.remover
 );
 
 module.exports = router;

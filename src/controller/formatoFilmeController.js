@@ -1,109 +1,91 @@
 const mongoose = require('mongoose');
-const Formato = require('../models/formatoFilmeModel'); 
-const Estoque = require('../models/estoqueFilmeModel'); 
+const Formato = require('../models/formatoFilmeModel');
+const Estoque = require('../models/estoqueFilmeModel');
 
-async function adicionarFormato(req, res) {
-    try {
-        const novoFormato = await Formato.create({
-            nome: req.body.nome
-        });
-
-        return res.status(201).json(novoFormato);
-
-    } catch (err) {
-        if (err.name === 'ValidationError') {
-            const mensagens = Object.values(err.errors).map(e => e.message);
-            return res.status(422).json({ msg: mensagens });
-        }
-        return res.status(500).json({ msg: "Erro interno do servidor" });
+async function criar(req, res) {
+  try {
+    const formato = await Formato.create({ nome: req.body.nome });
+    return res.status(201).json(formato);
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      const erros = Object.values(err.errors).map(e => e.message);
+      return res.status(422).json({ msg: erros });
     }
+    return res.status(500).json({ msg: "Erro interno do servidor" });
+  }
 }
 
-async function editarFormato(req, res) {
-    const { id } = req.params;
+async function atualizar(req, res) {
+  const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id))
-        return res.status(400).json({ msg: "Parâmetro inválido" });
+  if (!mongoose.Types.ObjectId.isValid(id))
+    return res.status(400).json({ msg: "Parâmetro inválido" });
 
-    try {
-        const formatoAtualizado = await Formato.findOneAndUpdate(
-            { _id: id },
-            { nome: req.body.nome },
-            {
-                runValidators: true,
-                new: true
-            }
-        );
+  try {
+    const formato = await Formato.findOneAndUpdate(
+      { _id: id },
+      { nome: req.body.nome },
+      { new: true, runValidators: true }
+    );
 
-        return res.status(200).json(formatoAtualizado);
-
-    } catch (err) {
-        if (err.name === 'ValidationError') {
-            const mensagens = Object.values(err.errors).map(e => e.message);
-            return res.status(422).json({ msg: mensagens });
-        }
-        return res.status(500).json({ msg: "Erro interno do servidor" });
+    return res.status(200).json(formato);
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      const erros = Object.values(err.errors).map(e => e.message);
+      return res.status(422).json({ msg: erros });
     }
+    return res.status(500).json({ msg: "Erro interno do servidor" });
+  }
 }
 
-async function listarFormatos(req, res) {
-    try {
-        const formatosListados = await Formato.find({});
-        return res.status(200).json(formatosListados);
-
-    } catch (err) {
-        return res.status(500).json({ msg: "Erro interno do servidor" });
-    }
+async function listar(req, res) {
+  try {
+    const lista = await Formato.find({});
+    return res.status(200).json(lista);
+  } catch {
+    return res.status(500).json({ msg: "Erro interno do servidor" });
+  }
 }
 
-async function buscarFormato(req, res, next) {
-    const { id } = req.params;
+async function localizar(req, res, next) {
+  const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id))
-        return res.status(400).json({ msg: "Parâmetro inválido" });
+  if (!mongoose.Types.ObjectId.isValid(id))
+    return res.status(400).json({ msg: "Parâmetro inválido" });
 
-    const formatoEncontrado = await Formato.findOne({ _id: id });
+  const formato = await Formato.findById(id);
 
-    if (formatoEncontrado) {
-        req.formato = formatoEncontrado;
-        return next();
-    } else {
-        return res.status(404).json({ msg: "Formato não encontrado" });
-    }
+  if (!formato)
+    return res.status(404).json({ msg: "Formato não encontrado" });
+
+  req.formato = formato;
+  next();
 }
 
-async function exibirFormato(req, res) {
-    return res.status(200).json(req.formato);
+function mostrar(req, res) {
+  return res.status(200).json(req.formato);
 }
 
-async function deletarFormato(req, res) {
-    const { id } = req.params;
+async function remover(req, res) {
+  const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id))
-        return res.status(400).json({ msg: "Parâmetro inválido" });
+  if (!mongoose.Types.ObjectId.isValid(id))
+    return res.status(400).json({ msg: "Parâmetro inválido" });
 
-    try {
-
-        // Todos os estoques que tinham esse formato terão formato = null
-        await Estoque.updateMany(
-            { formato: id },
-            { $set: { formato: null } }
-        );
-
-        await Formato.findOneAndDelete({ _id: id });
-
-        return res.status(204).json({});
-
-    } catch (err) {
-        return res.status(500).json({ msg: "Erro interno do servidor" });
-    }
+  try {
+    await Estoque.updateMany({ formato: id }, { $set: { formato: null } });
+    await Formato.findByIdAndDelete(id);
+    return res.status(204).send();
+  } catch {
+    return res.status(500).json({ msg: "Erro interno do servidor" });
+  }
 }
 
 module.exports = {
-    adicionarFormato,
-    editarFormato,
-    listarFormatos,
-    buscarFormato,
-    exibirFormato,
-    deletarFormato
+  criar,
+  atualizar,
+  listar,
+  localizar,
+  mostrar,
+  remover
 };
