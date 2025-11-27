@@ -11,16 +11,20 @@ const schema = new mongoose.Schema({
         required: [true, "Ano do filme é obrigatório"], 
         validate: {
             validator: v => typeof v === 'number',
-            message: props => 'Ano não é um número válido'
+            message: () => 'Ano não é um número válido'
         }
     },
     genero: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Genero',   // Similar ao Autor/Categoria no modelo original
+        ref: 'Genero'
     },
     diretor: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Diretor',  // Caso você queira que substitua o Autor
+        ref: 'Diretor'
+    },
+    categoria: {  
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CategoriaFilme' 
     }
 });
 
